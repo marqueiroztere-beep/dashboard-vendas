@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Dashboard de Vendas | Marcelo Queiroz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#06090f;--bg2:#0c1220;--card:#111a2e;--card2:#162036;
+  --input:#1a2744;--border:#1c2d4a;--border2:#2a3f66;
+  --t1:#edf2f7;--t2:#a0aec0;--t3:#5a6a85;
+  --emerald:#34d399;--emerald-bg:rgba(52,211,153,.08);
+  --blue:#60a5fa;--blue-bg:rgba(96,165,250,.08);
+  --amber:#fbbf24;--amber-bg:rgba(251,191,36,.08);
+  --violet:#a78bfa;--violet-bg:rgba(167,139,250,.08);
+  --rose:#fb7185;--cyan:#22d3ee;
+  --r:14px;--r2:10px
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t1);min-height:100dvh;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+
+/* Header */
+.header{padding:24px 16px 16px;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);background:rgba(6,9,15,.92)}
+.header-inner{max-width:760px;margin:0 auto}
+.header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+h1{font-size:18px;font-weight:700;color:var(--t1);letter-spacing:-.3px}
+h1 span{color:var(--emerald)}
+.badge{font-size:9px;font-weight:600;padding:4px 12px;border-radius:20px;background:var(--emerald-bg);color:var(--emerald);letter-spacing:1px;display:flex;align-items:center;gap:6px;border:1px solid rgba(52,211,153,.15)}
+.badge-dot{width:5px;height:5px;border-radius:50%;background:var(--emerald);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.subtitle{font-size:12px;color:var(--t3);font-weight:400}
+.last-update{font-size:10px;color:var(--t3);margin-top:10px;font-family:'JetBrains Mono',monospace;letter-spacing:.3px}
+
+.container{max-width:760px;margin:0 auto;padding:0 14px 80px}
+
+/* KPI */
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:18px 0}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px;position:relative;overflow:hidden}
+.kpi::after{content:'';position:absolute;top:0;left:0;right:0;height:1px}
+.kpi.e::after{background:linear-gradient(90deg,var(--emerald),transparent)}
+.kpi.b::after{background:linear-gradient(90deg,var(--blue),transparent)}
+.kpi.a::after{background:linear-gradient(90deg,var(--amber),transparent)}
+.kpi.v::after{background:linear-gradient(90deg,var(--violet),transparent)}
+.kpi-top{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.kpi .ico{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px}
+.kpi .lbl{font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.8px}
+.kpi .val{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;letter-spacing:-.5px;line-height:1}
+.kpi .sub{font-size:10px;color:var(--t3);margin-top:6px;font-family:'JetBrains Mono',monospace}
+.trend{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;padding:3px 8px;border-radius:6px;margin-top:8px;font-family:'JetBrains Mono',monospace}
+.trend.up{background:rgba(52,211,153,.1);color:var(--emerald)}.trend.dn{background:rgba(251,113,133,.1);color:var(--rose)}
+
+/* Sections */
+.section{margin-top:28px}
+.section-header{margin-bottom:14px;padding:0 2px}
+.section-title{font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;letter-spacing:-.2px}
+.dot{width:6px;height:6px;border-radius:50%}
+
+/* Filter */
+.filter-wrap{margin-top:22px;position:relative}
+.filter-label{font-size:9px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:10px}
+.chips-outer{position:relative}
+.chips{display:flex;flex-wrap:wrap;gap:6px;padding-bottom:4px}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex-shrink:0;font-size:11px;font-weight:500;padding:8px 16px;border-radius:8px;background:var(--card);border:1px solid var(--border);color:var(--t2);cursor:pointer;white-space:nowrap;transition:all .2s;-webkit-tap-highlight-color:transparent;user-select:none}
+.chip:hover{border-color:var(--border2);background:var(--card2)}
+.chip.on{background:var(--emerald-bg);border-color:rgba(52,211,153,.3);color:var(--emerald)}
+
+/* Chart Card */
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px 14px 14px;overflow:visible}
+
+/* Vertical Bar Chart */
+.vbar-chart{display:flex;align-items:flex-end;gap:2px;height:240px;padding-top:24px;overflow-x:auto;overflow-y:visible;scrollbar-width:none;position:relative}
+.vbar-chart::-webkit-scrollbar{display:none}
+.vbar-col{display:flex;flex-direction:column;align-items:center;flex:1;min-width:20px;height:100%;justify-content:flex-end;position:relative;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.vbar-tip{position:absolute;top:0;left:50%;transform:translateX(-50%) translateY(-4px);background:rgba(12,18,32,.95);border:1px solid var(--border2);border-radius:8px;padding:6px 10px;white-space:nowrap;opacity:0;visibility:hidden;transition:all .2s;z-index:10;pointer-events:none;text-align:center}
+.vbar-tip::after{content:'';position:absolute;bottom:100%;left:50%;transform:translateX(-50%);border:4px solid transparent;border-bottom-color:var(--border2)}
+.vbar-tip .tv{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;color:var(--t1)}
+.vbar-tip .ts{font-size:9px;color:var(--t3);margin-top:2px}
+.vbar-col:hover .vbar-tip,.vbar-col.active .vbar-tip{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0)}
+.vbar-col:first-child .vbar-tip{left:0;transform:translateX(0) translateY(-4px)}
+.vbar-col:first-child:hover .vbar-tip,.vbar-col:first-child.active .vbar-tip{transform:translateX(0) translateY(0)}
+.vbar-col:last-child .vbar-tip{left:auto;right:0;transform:translateX(0) translateY(-4px)}
+.vbar-col:last-child:hover .vbar-tip,.vbar-col:last-child.active .vbar-tip{transform:translateX(0) translateY(0)}
+.vbar-col:hover .vbar-bar,.vbar-col.active .vbar-bar{filter:brightness(1.4)}
+.vbar-bar{width:100%;max-width:32px;border-radius:4px 4px 1px 1px;transition:height .7s cubic-bezier(.22,1,.36,1),filter .15s;min-height:2px;position:relative}
+.vbar-lbl{font-size:8px;font-family:'JetBrains Mono',monospace;color:var(--t2);margin-top:8px;white-space:nowrap;text-align:center;line-height:1.3}
+.vbar-lbl .yr{font-size:8px;font-weight:500;color:var(--t3);display:block;margin-top:1px}
+/* Grid lines */
+.vbar-grid{position:absolute;top:24px;left:0;right:0;bottom:20px;display:flex;flex-direction:column;justify-content:space-between;pointer-events:none;z-index:0}
+.vbar-grid-line{border-top:1px dashed rgba(42,63,102,.35);width:100%}
+
+/* Horizontal Bar Chart */
+.hbar-chart{display:flex;flex-direction:column;gap:10px}
+.hbar-row{display:flex;align-items:center;gap:10px}
+.hbar-pos{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;color:var(--t3);width:18px;text-align:right;flex-shrink:0}
+.hbar-name{font-size:11px;color:var(--t2);width:130px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:right;font-weight:500}
+.hbar-track{flex:1;height:26px;background:var(--input);border-radius:6px;overflow:hidden;position:relative}
+.hbar-fill{height:100%;border-radius:6px;transition:width .8s cubic-bezier(.22,1,.36,1);display:flex;align-items:center;justify-content:flex-end;padding-right:10px;padding-left:8px;min-width:60px}
+.hbar-val{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;color:#fff;white-space:nowrap}
+
+/* Ranking */
+.ranking{display:flex;flex-direction:column;gap:6px}
+.rank-item{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);padding:14px 16px;display:flex;align-items:center;gap:12px;transition:border-color .2s}
+.rank-item:hover{border-color:var(--border2)}
+.rank-badge{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;flex-shrink:0}
+.r1{background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#000}
+.r2{background:linear-gradient(135deg,#94a3b8,#64748b);color:#000}
+.r3{background:linear-gradient(135deg,#b8865e,#96703f);color:#fff}
+.rx{background:var(--input);color:var(--t3)}
+.rank-info{flex:1;min-width:0}
+.rank-name{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rank-meta{font-size:10px;color:var(--t3);margin-top:3px}
+.rank-val{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:var(--emerald);flex-shrink:0}
+.pbar-bg{height:2px;background:var(--input);border-radius:2px;margin-top:8px}
+.pbar-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--emerald),var(--cyan));transition:width .6s ease}
+
+.fade{animation:fadeIn .5s ease forwards;opacity:0}
+@keyframes fadeIn{to{opacity:1}}
+
+.active-filter{display:inline-flex;align-items:center;gap:8px;margin-top:16px;padding:6px 14px;border-radius:8px;background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.2);font-size:11px;color:var(--t2)}
+.active-filter strong{color:var(--emerald);font-weight:600}
+.clear-month{cursor:pointer;color:var(--t3);font-size:13px;margin-left:4px;transition:color .15s}
+.clear-month:hover{color:var(--rose)}
+
+.vbar-col.selected .vbar-bar{box-shadow:0 0 12px rgba(52,211,153,.3)}
+
+/* Divider */
+.divider{height:1px;background:var(--border);margin:28px 0 0}
+
+@media(min-width:768px){
+  .kpi-grid{grid-template-columns:repeat(4,1fr)}
+  h1{font-size:20px}
+  .kpi .val{font-size:24px}
+  .hbar-name{width:170px}
+  .vbar-lbl{font-size:9px}
+}
+</style>
+</head>
+<body>
+<div class="header"><div class="header-inner">
+<div class="header-top"><h1>Vendas por <span>Curso</span></h1><span class="badge"><span class="badge-dot"></span>LIVE</span></div>
+<div class="subtitle">Marcelo Queiroz — Painel de Acompanhamento</div>
+<div class="last-update" id="upd"></div>
+</div></div>
+<div class="container" id="app"></div>
+
+<script>
+const SHEET_ID='1zzZHrMuQh2kJDRkwi1Fr6NxCeaGrSjYcFxHGGgdNP6c';
+const EMBEDDED=[{"concurso":"Coaching para Concursos","nome":"Cronograma de Estudos (3 sessões de Coaching) - Boleto ou PIX à vista","anomes":"2024-01","valor_total":2520.0,"contagem":8},{"concurso":"Coaching para Concursos","nome":"Cronograma de Estudos (3 sessões de Coaching) - Boleto ou PIX à vista","anomes":"2024-04","valor_total":630.0,"contagem":2},{"concurso":"Coaching para Concursos","nome":"Cronograma de Estudos (3 sessões de Coaching) - Boleto ou PIX à vista","anomes":"2024-05","valor_total":945.0,"contagem":3},{"concurso":"Coaching para Concursos","nome":"Cronograma de Estudos (3 sessões de Coaching) - Boleto ou PIX à vista","anomes":"2024-06","valor_total":315.0,"contagem":1},{"concurso":"Coaching para Concursos","nome":"Cronograma de Estudos (3 sessões de Coaching) - Boleto ou PIX à vista","anomes":"2024-07","valor_total":945.0,"contagem":3},{"concurso":"Coaching para Concursos","nome":"Cronograma de Estudos (3 sessões de Coaching) - Boleto ou PIX à vista","anomes":"2024-08","valor_total":630.0,"contagem":2},{"concurso":"Coaching para Concursos","nome":"Cronograma de Estudos (3 sessões de Coaching) - Boleto ou PIX à vista","anomes":"2024-09","valor_total":1260.0,"contagem":4},{"concurso":"Coaching para Concursos","nome":"Cronograma de Estudos (3 sessões de Coaching) - Boleto ou PIX à vista","anomes":"2024-10","valor_total":315.0,"contagem":1},{"concurso":"Coaching para Concursos","nome":"Cronograma de Estudos (3 sessões de Coaching) - Boleto ou PIX à vista","anomes":"2024-11","valor_total":315.0,"contagem":1},{"concurso":"Coaching para Concursos","nome":"Cronograma de Estudos (3 sessões de Coaching) - Boleto ou PIX à vista","anomes":"2024-12","valor_total":945.0,"contagem":3},{"concurso":"Coaching para Concursos","nome":"Cronograma de Estudos (3 sessões de Coaching) - Boleto ou PIX à vista","anomes":"2025-09","valor_total":315.0,"contagem":1},{"concurso":"Coaching para Concursos","nome":"Cronograma de Estudos (3 sessões de Coaching) - Boleto ou PIX à vista","anomes":"2025-12","valor_total":315.0,"contagem":1},{"concurso":"Coaching para Concursos","nome":"Cronograma de Estudos (3 sessões de Coaching) - Boleto ou PIX à vista","anomes":"2026-01","valor_total":1260.0,"contagem":4},{"concurso":"Coaching para Concursos","nome":"Cronograma de Estudos (3 sessões de Coaching) - Boleto ou PIX à vista","anomes":"2026-02","valor_total":3780.0,"contagem":12},{"concurso":"Coaching para Concursos","nome":"Cronograma de Estudos (3 sessões de Coaching) - Boleto ou PIX à vista","anomes":"2026-03","valor_total":1260.0,"contagem":4},{"concurso":"Coaching para Concursos","nome":"Cronograma de Estudos (3 sessões de Coaching) - Cartão 12x - de R$ 597 por R$ 350 [ OFERTA ÚNICA EXCLUSIVA ]","anomes":"2024-01","valor_total":5950.0,"contagem":17},{"concurso":"Coaching para Concursos","nome":"Cronograma de Estudos (3 sessões de Coaching) - Cartão 12x - de R$ 597 por R$ 350 [ OFERTA ÚNICA EXCLUSIVA ]","anomes":"2024-02","valor_total":350.0,"contagem":1},{"concurso":"Coaching para Concursos","nome":"Cronograma de Estudos (3 sessões de Coaching) - Cartão 12x - de R$ 597 por R$ 350 [ OFERTA ÚNICA EXCLUSIVA ]","anomes":"2024-04","valor_total":1050.0,"contagem":3},{"concurso":"Coaching para Concursos","nome":"Cronograma de Estudos (3 sessões de Coaching) - Cartão 12x - de R$ 597 por R$ 350 [ OFERTA ÚNICA EXCLUSIVA ]","anomes":"2024-05","valor_total":3500.0,"contagem":10},{"concurso":"Coaching para Concursos","nome":"Cronograma de Estudos (3 sessões de Coaching) - Cartão 12x - de R$ 597 por R$ 350 [ OFERTA ÚNICA EXCLUSIVA ]","anomes":"2024-06","valor_total":2800.0,"contagem":8},{"concurso":"Coaching para Concursos","nome":"Cronograma de Estudos (3 sessões de Coaching) - Cartão 12x - de R$ 597 por R$ 350 [ OFERTA ÚNICA EXCLUSIVA ]","anomes":"2024-07","valor_total":4200.0,"contagem":12},{"concurso":"Coaching para Concursos","nome":"Cronograma de Estudos (3 sessões de Coaching) - Cartão 12x - de R$ 597 por R$ 350 [ OFERTA ÚNICA EXCLUSIVA ]","anomes":"2024-08","valor_total":1750.0,"contagem":5},{"concurso":"Coaching para Concursos","nome":"Cronograma de Estudos (3 sessões de Coaching) - Cartão 12x - de R$ 597 por R$ 350 [ OFERTA ÚNICA EXCLUSIVA ]","anomes":"2024-09","valor_total":3500.0,"contagem":10},{"concurso":"Coaching para Concursos","nome":"Cronograma de Estudos (3 sessões de Coaching) - Cartão 12x - de R$ 597 por R$ 350 [ OFERTA ÚNICA EXCLUSIVA ]","anomes":"2024-10","valor_total":2800.0,"contagem":8},{"concurso":"Coaching para Concursos","nome":"Cronograma de Estudos (3 sessões de Coaching) - Cartão 12x - de R$ 597 por R$ 350 [ OFERTA ÚNICA EXCLUSIVA ]","anomes":"2024-11","valor_total":1750.0,"contagem":5},{"concurso":"Coaching para Concursos","nome":"Cronograma de Estudos (3 sessões de Coaching) - Cartão 12x - de R$ 597 por R$ 350 [ OFERTA ÚNICA EXCLUSIVA ]","anomes":"2024-12","valor_total":2450.0,"contagem":7},{"concurso":"Coaching para Concursos","nome":"Cronograma de Estudos (3 sessões de Coaching) - Cartão 12x - de R$ 597 por R$ 350 [ OFERTA ÚNICA EXCLUSIVA ]","anomes":"2025-07","valor_total":1400.0,"contagem":4},{"concurso":"Coaching para Concursos","nome":"Cronograma de Estudos (3 sessões de Coaching) - Cartão 12x - de R$ 597 por R$ 350 [ OFERTA ÚNICA EXCLUSIVA ]","anomes":"2025-08","valor_total":3850.0,"contagem":11},{"concurso":"Coaching para Concursos","nome":"Cronograma de Estudos (3 sessões de Coaching) - Cartão 12x - de R$ 597 por R$ 350 [ OFERTA ÚNICA EXCLUSIVA ]","anomes":"2025-09","valor_total":3150.0,"contagem":9},{"concurso":"Coaching para Concursos","nome":"Cronograma de Estudos (3 sessões de Coaching) - Cartão 12x - de R$ 597 por R$ 350 [ OFERTA ÚNICA EXCLUSIVA ]","anomes":"2025-10","valor_total":1400.0,"contagem":4},{"concurso":"Coaching para Concursos","nome":"Cronograma de Estudos (3 sessões de Coaching) - Cartão 12x - de R$ 597 por R$ 350 [ OFERTA ÚNICA EXCLUSIVA ]","anomes":"2025-11","valor_total":2800.0,"contagem":8},{"concurso":"Coaching para Concursos","nome":"Cronograma de Estudos (3 sessões de Coaching) - Cartão 12x - de R$ 597 por R$ 350 [ OFERTA ÚNICA EXCLUSIVA ]","anomes":"2025-12","valor_total":1750.0,"contagem":5},{"concurso":"Coaching para Concursos","nome":"Cronograma de Estudos (3 sessões de Coaching) - Cartão 12x - de R$ 597 por R$ 350 [ OFERTA ÚNICA EXCLUSIVA ]","anomes":"2026-01","valor_total":5950.0,"contagem":17},{"concurso":"Coaching para Concursos","nome":"Cronograma de Estudos (3 sessões de Coaching) - Cartão 12x - de R$ 597 por R$ 350 [ OFERTA ÚNICA EXCLUSIVA ]","anomes":"2026-02","valor_total":20650.0,"contagem":59},{"concurso":"Coaching para Concursos","nome":"Cronograma de Estudos (3 sessões de Coaching) - Cartão 12x - de R$ 597 por R$ 350 [ OFERTA ÚNICA EXCLUSIVA ]","anomes":"2026-03","valor_total":7000.0,"contagem":20},{"concurso":"Cursos Regulares","nome":"Curso Regular Adriana Figueiredo","anomes":"2024-06","valor_total":370.0,"contagem":1},{"concurso":"Cursos Regulares","nome":"Curso Regular Adriana Figueiredo","anomes":"2024-07","valor_total":2421.88,"contagem":7},{"concurso":"Cursos Regulares","nome":"Curso Regular Adriana Figueiredo","anomes":"2024-08","valor_total":6242.7,"contagem":18},{"concurso":"Cursos Regulares","nome":"Curso Regular Adriana Figueiredo","anomes":"2024-09","valor_total":1305.43,"contagem":4},{"concurso":"Cursos Regulares","nome":"Curso Regular Adriana Figueiredo","anomes":"2024-10","valor_total":700.0,"contagem":2},{"concurso":"Cursos Regulares","nome":"Curso Regular Adriana Figueiredo","anomes":"2024-11","valor_total":1383.42,"contagem":4},{"concurso":"Cursos Regulares","nome":"Curso Regular Adriana Figueiredo","anomes":"2024-12","valor_total":1888.79,"contagem":6},{"concurso":"Cursos Regulares","nome":"Curso Regular Adriana Figueiredo","anomes":"2025-01","valor_total":6182.62,"contagem":18},{"concurso":"Cursos Regulares","nome":"Curso Regular Adriana Figueiredo","anomes":"2025-02","valor_total":9825.11,"contagem":29},{"concurso":"Cursos Regulares","nome":"Curso Regular Adriana Figueiredo","anomes":"2025-03","valor_total":10561.56,"contagem":33},{"concurso":"Cursos Regulares","nome":"Curso Regular Adriana Figueiredo","anomes":"2025-04","valor_total":4529.84,"contagem":15},{"concurso":"Cursos Regulares","nome":"Curso Regular Adriana Figueiredo","anomes":"2025-05","valor_total":5474.7,"contagem":16},{"concurso":"Cursos Regulares","nome":"Curso Regular Adriana Figueiredo","anomes":"2025-06","valor_total":5113.11,"contagem":15},{"concurso":"Cursos Regulares","nome":"Curso Regular Adriana Figueiredo","anomes":"2025-07","valor_total":6479.23,"contagem":19},{"concurso":"Cursos Regulares","nome":"Curso Regular Adriana Figueiredo","anomes":"2025-08","valor_total":4784.5,"contagem":14},{"concurso":"Cursos Regulares","nome":"Curso Regular Adriana Figueiredo","anomes":"2025-09","valor_total":5267.76,"contagem":16},{"concurso":"Cursos Regulares","nome":"Curso Regular Adriana Figueiredo","anomes":"2025-10","valor_total":4287.71,"contagem":13},{"concurso":"Cursos Regulares","nome":"Curso Regular Adriana Figueiredo","anomes":"2025-11","valor_total":4939.79,"contagem":15},{"concurso":"Cursos Regulares","nome":"Curso Regular Adriana Figueiredo","anomes":"2025-12","valor_total":4045.94,"contagem":13},{"concurso":"Cursos Regulares","nome":"Curso Regular Adriana Figueiredo","anomes":"2026-01","valor_total":4731.45,"contagem":14},{"concurso":"Cursos Regulares","nome":"Curso Regular Adriana Figueiredo","anomes":"2026-02","valor_total":5378.85,"contagem":16},{"concurso":"Cursos Regulares","nome":"Curso Regular Adriana Figueiredo","anomes":"2026-03","valor_total":329.0,"contagem":1},{"concurso":"Cursos Regulares com Videoaulas","nome":"Curso Regular Nelma Fontana","anomes":"2024-07","valor_total":1400.0,"contagem":4},{"concurso":"Cursos Regulares com Videoaulas","nome":"Curso Regular Nelma Fontana","anomes":"2024-08","valor_total":1367.7,"contagem":4},{"concurso":"Cursos Regulares com Videoaulas","nome":"Curso Regular Nelma Fontana","anomes":"2024-09","valor_total":1619.2,"contagem":5},{"concurso":"Cursos Regulares com Videoaulas","nome":"Curso Regular Nelma Fontana","anomes":"2024-10","valor_total":3065.7,"contagem":10},{"concurso":"Cursos Regulares com Videoaulas","nome":"Curso Regular Nelma Fontana","anomes":"2024-11","valor_total":2088.8,"contagem":6},{"concurso":"Cursos Regulares com Videoaulas","nome":"Curso Regular Nelma Fontana","anomes":"2024-12","valor_total":2012.0,"contagem":6},{"concurso":"Cursos Regulares com Videoaulas","nome":"Curso Regular Nelma Fontana","anomes":"2025-01","valor_total":3081.1,"contagem":9},{"concurso":"Cursos Regulares com Videoaulas","nome":"Curso Regular Nelma Fontana","anomes":"2025-02","valor_total":2773.9,"contagem":9},{"concurso":"Cursos Regulares com Videoaulas","nome":"Curso Regular Nelma Fontana","anomes":"2025-03","valor_total":1613.9,"contagem":5},{"concurso":"Cursos Regulares com Videoaulas","nome":"Curso Regular Nelma Fontana","anomes":"2025-04","valor_total":1954.7,"contagem":6},{"concurso":"Cursos Regulares com Videoaulas","nome":"Curso Regular Nelma Fontana","anomes":"2025-05","valor_total":3355.8,"contagem":11},{"concurso":"Cursos Regulares com Videoaulas","nome":"Curso Regular Nelma Fontana","anomes":"2025-06","valor_total":2632.4,"contagem":8},{"concurso":"Cursos Regulares com Videoaulas","nome":"Curso Regular Nelma Fontana","anomes":"2025-07","valor_total":3319.2,"contagem":10},{"concurso":"Cursos Regulares com Videoaulas","nome":"Curso Regular Nelma Fontana","anomes":"2025-08","valor_total":4282.6,"contagem":13},{"concurso":"Cursos Regulares com Videoaulas","nome":"Curso Regular Nelma Fontana","anomes":"2025-09","valor_total":1238.2,"contagem":4},{"concurso":"Cursos Regulares com Videoaulas","nome":"Curso Regular Nelma Fontana","anomes":"2025-10","valor_total":3820.15,"contagem":12},{"concurso":"Cursos Regulares com Videoaulas","nome":"Curso Regular Nelma Fontana","anomes":"2025-11","valor_total":1667.9,"contagem":5},{"concurso":"Cursos Regulares com Videoaulas","nome":"Curso Regular Nelma Fontana","anomes":"2025-12","valor_total":2239.1,"contagem":7},{"concurso":"Cursos Regulares com Videoaulas","nome":"Curso Regular Nelma Fontana","anomes":"2026-01","valor_total":2181.9,"contagem":7},{"concurso":"Cursos Regulares com Videoaulas","nome":"Curso Regular Nelma Fontana","anomes":"2026-02","valor_total":2711.8,"contagem":9},{"concurso":"Cursos Regulares com Videoaulas","nome":"Curso Regular Silvio Sande","anomes":"2024-08","valor_total":630.0,"contagem":2},{"concurso":"Cursos Regulares com Videoaulas","nome":"Curso Regular Silvio Sande","anomes":"2024-09","valor_total":282.3,"contagem":1},{"concurso":"Cursos Regulares com Videoaulas","nome":"Curso Regular Silvio Sande","anomes":"2024-10","valor_total":1050.0,"contagem":3},{"concurso":"Cursos Regulares com Videoaulas","nome":"Curso Regular Silvio Sande","anomes":"2024-11","valor_total":312.9,"contagem":1},{"concurso":"Cursos Regulares com Videoaulas","nome":"Curso Regular Silvio Sande","anomes":"2024-12","valor_total":350.0,"contagem":1},{"concurso":"Cursos Regulares com Videoaulas","nome":"Curso Regular Silvio Sande","anomes":"2025-01","valor_total":350.0,"contagem":1},{"concurso":"Cursos Regulares com Videoaulas","nome":"Curso Regular Silvio Sande","anomes":"2025-02","valor_total":867.5,"contagem":3},{"concurso":"Cursos Regulares com Videoaulas","nome":"Curso Regular Silvio Sande","anomes":"2025-03","valor_total":991.5,"contagem":3},{"concurso":"Cursos Regulares com Videoaulas","nome":"Curso Regular Silvio Sande","anomes":"2025-04","valor_total":1497.43,"contagem":5},{"concurso":"Cursos Regulares com Videoaulas","nome":"Curso Regular Silvio Sande","anomes":"2025-05","valor_total":1176.43,"contagem":4},{"concurso":"Cursos Regulares com Videoaulas","nome":"Curso Regular Silvio Sande","anomes":"2025-06","valor_total":2020.5,"contagem":6},{"concurso":"Cursos Regulares com Videoaulas","nome":"Curso Regular Silvio Sande","anomes":"2025-07","valor_total":658.1,"contagem":2},{"concurso":"Cursos Regulares com Videoaulas","nome":"Curso Regular Silvio Sande","anomes":"2025-08","valor_total":4055.0,"contagem":12},{"concurso":"Cursos Regulares com Videoaulas","nome":"Curso Regular Silvio Sande","anomes":"2025-09","valor_total":1013.31,"contagem":3},{"concurso":"Cursos Regulares com Videoaulas","nome":"Curso Regular Silvio Sande","anomes":"2025-10","valor_total":345.3,"contagem":1},{"concurso":"Cursos Regulares com Videoaulas","nome":"Curso Regular Silvio Sande","anomes":"2025-11","valor_total":3394.95,"contagem":10},{"concurso":"Cursos Regulares com Videoaulas","nome":"Curso Regular Silvio Sande","anomes":"2025-12","valor_total":1464.9,"contagem":5},{"concurso":"Cursos Regulares com Videoaulas","nome":"Curso Regular Silvio Sande","anomes":"2026-01","valor_total":350.0,"contagem":1},{"concurso":"Cursos Regulares com Videoaulas","nome":"Curso Regular Silvio Sande","anomes":"2026-02","valor_total":290.2,"contagem":1},{"concurso":"Cursos Regulares com Videoaulas","nome":"RESUMOS ESTRATÉGICOS","anomes":"2025-07","valor_total":10559.78,"contagem":40},{"concurso":"Cursos Regulares com Videoaulas","nome":"RESUMOS ESTRATÉGICOS","anomes":"2025-08","valor_total":16154.79,"contagem":47},{"concurso":"Cursos Regulares com Videoaulas","nome":"RESUMOS ESTRATÉGICOS","anomes":"2025-09","valor_total":17826.19,"contagem":55},{"concurso":"Cursos Regulares com Videoaulas","nome":"RESUMOS ESTRATÉGICOS","anomes":"2025-10","valor_total":16203.67,"contagem":51},{"concurso":"Cursos Regulares com Videoaulas","nome":"RESUMOS ESTRATÉGICOS","anomes":"2025-11","valor_total":6343.23,"contagem":26},{"concurso":"Cursos Regulares com Videoaulas","nome":"RESUMOS ESTRATÉGICOS","anomes":"2025-12","valor_total":3895.28,"contagem":12},{"concurso":"Cursos Regulares com Videoaulas","nome":"RESUMOS ESTRATÉGICOS","anomes":"2026-02","valor_total":5874.33,"contagem":17},{"concurso":"Cursos Regulares com Videoaulas","nome":"RESUMOS ESTRATÉGICOS","anomes":"2026-03","valor_total":651.98,"contagem":3},{"concurso":"Discursivas para Concursos","nome":"Discursivas para Concursos Públicos - 3 correções - Boleto ou PIX","anomes":"2024-01","valor_total":1010.0,"contagem":4},{"concurso":"Discursivas para Concursos","nome":"Discursivas para Concursos Públicos - 3 correções - Boleto ou PIX","anomes":"2024-02","valor_total":315.0,"contagem":1},{"concurso":"Discursivas para Concursos","nome":"Discursivas para Concursos Públicos - 3 correções - Boleto ou PIX","anomes":"2024-03","valor_total":630.0,"contagem":2},{"concurso":"Discursivas para Concursos","nome":"Discursivas para Concursos Públicos - 3 correções - Boleto ou PIX","anomes":"2024-04","valor_total":945.0,"contagem":3},{"concurso":"Discursivas para Concursos","nome":"Discursivas para Concursos Públicos - 3 correções - Boleto ou PIX","anomes":"2024-07","valor_total":945.0,"contagem":3},{"concurso":"Discursivas para Concursos","nome":"Discursivas para Concursos Públicos - 3 correções - Boleto ou PIX","anomes":"2024-08","valor_total":535.5,"contagem":2},{"concurso":"Discursivas para Concursos","nome":"Discursivas para Concursos Públicos - 3 correções - Boleto ou PIX","anomes":"2024-10","valor_total":315.0,"contagem":1},{"concurso":"Discursivas para Concursos","nome":"Discursivas para Concursos Públicos - 3 correções - Boleto ou PIX","anomes":"2024-12","valor_total":315.0,"contagem":1},{"concurso":"Discursivas para Concursos","nome":"Discursivas para Concursos Públicos - 3 correções - Boleto ou PIX","anomes":"2025-01","valor_total":315.0,"contagem":1},{"concurso":"Discursivas para Concursos","nome":"Discursivas para Concursos Públicos - 3 correções - Boleto ou PIX","anomes":"2025-02","valor_total":315.0,"contagem":1},{"concurso":"Discursivas para Concursos","nome":"Discursivas para Concursos Públicos - 3 correções - Cartão 12x","anomes":"2024-01","valor_total":315.0,"contagem":1},{"concurso":"Discursivas para Concursos","nome":"Discursivas para Concursos Públicos - 3 correções - Cartão 12x","anomes":"2024-02","valor_total":947.0,"contagem":4},{"concurso":"Discursivas para Concursos","nome":"Discursivas para Concursos Públicos - 3 correções - Cartão 12x","anomes":"2024-03","valor_total":315.0,"contagem":1},{"concurso":"Discursivas para Concursos","nome":"Discursivas para Concursos Públicos - 3 correções - Cartão 12x","anomes":"2024-04","valor_total":630.0,"contagem":2},{"concurso":"Discursivas para Concursos","nome":"Discursivas para Concursos Públicos - 3 correções - Cartão 12x","anomes":"2024-05","valor_total":945.0,"contagem":3},{"concurso":"Discursivas para Concursos","nome":"Discursivas para Concursos Públicos - 3 correções - Cartão 12x","anomes":"2024-06","valor_total":315.0,"contagem":1},{"concurso":"Discursivas para Concursos","nome":"Discursivas para Concursos Públicos - 3 correções - Cartão 12x","anomes":"2024-07","valor_total":630.0,"contagem":2},{"concurso":"Discursivas para Concursos","nome":"Discursivas para Concursos Públicos - 3 correções - Cartão 12x","anomes":"2024-08","valor_total":315.0,"contagem":1},{"concurso":"Discursivas para Concursos","nome":"Discursivas para Concursos Públicos - 3 correções - Cartão 12x","anomes":"2024-10","valor_total":315.0,"contagem":1},{"concurso":"Discursivas para Concursos","nome":"Discursivas para Concursos Públicos - 3 correções - Cartão 12x","anomes":"2024-11","valor_total":630.0,"contagem":2},{"concurso":"Discursivas para Concursos","nome":"Discursivas para Concursos Públicos - 3 correções - Cartão 12x","anomes":"2024-12","valor_total":630.0,"contagem":2},{"concurso":"Discursivas para Concursos","nome":"Discursivas para Concursos Públicos - 3 correções - Cartão 12x","anomes":"2025-01","valor_total":315.0,"contagem":1},{"concurso":"Discursivas para Concursos","nome":"Discursivas para Concursos Públicos - 3 correções - Cartão 12x","anomes":"2025-04","valor_total":315.0,"contagem":1},{"concurso":"Discursivas para Concursos","nome":"Discursivas para Concursos Públicos - 3 correções - Cartão 12x","anomes":"2025-05","valor_total":315.0,"contagem":1},{"concurso":"Discursivas para Concursos","nome":"Discursivas para Concursos Públicos - 3 correções - Cartão 12x","anomes":"2025-06","valor_total":315.0,"contagem":1},{"concurso":"⭐ Cursos Personalizados","nome":"LEGISLAÇÃO ESTRATÉGICA - SEFAZ/SP","anomes":"2025-11","valor_total":598.53,"contagem":2},{"concurso":"⭐ Cursos Personalizados","nome":"LEGISLAÇÃO ESTRATÉGICA - SEFAZ/SP","anomes":"2025-12","valor_total":4302.9,"contagem":15},{"concurso":"⭐ Cursos Personalizados","nome":"LEGISLAÇÃO ESTRATÉGICA - SEFAZ/SP","anomes":"2026-01","valor_total":300.0,"contagem":1},{"concurso":"⭐ Cursos Personalizados","nome":"LEGISLAÇÃO ESTRATÉGICA - ÁREA FISCAL","anomes":"2025-11","valor_total":1161.0,"contagem":4},{"concurso":"⭐ Cursos Personalizados","nome":"LEGISLAÇÃO ESTRATÉGICA - ÁREA FISCAL","anomes":"2025-12","valor_total":3987.39,"contagem":14},{"concurso":"⭐ Cursos Personalizados","nome":"LEGISLAÇÃO ESTRATÉGICA - ÁREA FISCAL","anomes":"2026-01","valor_total":1487.46,"contagem":5},{"concurso":"⭐ Cursos Personalizados","nome":"LEGISLAÇÃO ESTRATÉGICA - ÁREA FISCAL","anomes":"2026-02","valor_total":1186.48,"contagem":4},{"concurso":"⭐ Cursos Personalizados","nome":"LEGISLAÇÃO ESTRATÉGICA - ÁREA FISCAL","anomes":"2026-03","valor_total":600.0,"contagem":2}];
+let rawData=[];
+let activeFilters=new Set(); // vazio = todos
+let activeMonths=new Set();  // vazio = todos os meses
+const COLORS=['#34d399','#60a5fa','#fbbf24','#a78bfa','#fb7185','#22d3ee','#f472b6','#a3e635','#fb923c','#818cf8'];
+
+function loadSheets(){
+  return new Promise((resolve,reject)=>{
+    const cb='__gv_'+Date.now();
+    const t=setTimeout(()=>{delete window[cb];reject('timeout')},10000);
+    window[cb]=resp=>{
+      clearTimeout(t);delete window[cb];
+      try{
+        const cols=resp.table.cols.map(c=>c.label);
+        resolve(resp.table.rows.map(row=>{
+          const o={};row.c.forEach((cell,i)=>{o[cols[i]]=cell?cell.v:null});
+          o.valor_total=Number(o.valor_total)||0;o.contagem=Number(o.contagem)||0;return o;
+        }).filter(r=>r.anomes&&r.valor_total>0));
+      }catch(e){reject(e)}
+    };
+    const s=document.createElement('script');
+    s.src=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=responseHandler:${cb}`;
+    s.onerror=()=>{clearTimeout(t);delete window[cb];reject('err')};
+    document.head.appendChild(s);
+  });
+}
+
+// Aplica filtros
+function getFiltered(){
+  let d=rawData;
+  if(activeFilters.size>0) d=d.filter(r=>activeFilters.has(r.concurso));
+  return d;
+}
+function getDetail(d){
+  if(activeMonths.size>0) return d.filter(r=>activeMonths.has(r.anomes));
+  return d;
+}
+
+function calcChart(data){
+  const months=[...new Set(data.map(r=>r.anomes))].sort();
+  const byMonth={};
+  data.forEach(r=>{
+    if(!byMonth[r.anomes])byMonth[r.anomes]={valor:0,vendas:0};
+    byMonth[r.anomes].valor+=r.valor_total;byMonth[r.anomes].vendas+=r.contagem;
+  });
+  return{months,byMonth};
+}
+
+function calcDetail(data){
+  const tv=data.reduce((s,r)=>s+r.valor_total,0);
+  const tq=data.reduce((s,r)=>s+r.contagem,0);
+  const tk=tq>0?tv/tq:0;
+  const byCurso={};
+  data.forEach(r=>{
+    if(!byCurso[r.nome])byCurso[r.nome]={valor:0,vendas:0,concurso:r.concurso};
+    byCurso[r.nome].valor+=r.valor_total;byCurso[r.nome].vendas+=r.contagem;
+  });
+  const ranking=Object.entries(byCurso).map(([n,d])=>({nome:n,...d})).sort((a,b)=>b.valor-a.valor);
+  // trend
+  let trend=null;
+  if(activeMonths.size===1){
+    const m=[...activeMonths][0];
+    const catData=getFiltered();
+    const months=[...new Set(catData.map(r=>r.anomes))].sort();
+    const idx=months.indexOf(m);
+    if(idx>0){
+      const pm=months[idx-1];
+      const pv=catData.filter(r=>r.anomes===pm).reduce((s,r)=>s+r.valor_total,0);
+      if(pv>0) trend=((tv-pv)/pv*100);
+    }
+  } else if(activeMonths.size===0){
+    const catData=getFiltered();
+    const months=[...new Set(catData.map(r=>r.anomes))].sort();
+    if(months.length>1){
+      const lm=months[months.length-1],pm=months[months.length-2];
+      const lv=catData.filter(r=>r.anomes===lm).reduce((s,r)=>s+r.valor_total,0);
+      const pv=catData.filter(r=>r.anomes===pm).reduce((s,r)=>s+r.valor_total,0);
+      if(pv>0) trend=((lv-pv)/pv*100);
+    }
+  }
+  return{tv,tq,tk,ranking,trend};
+}
+
+function fmil(v){
+  if(v>=1000) return 'R$ '+(v/1000).toFixed(1).replace('.',',')+' mil';
+  return 'R$ '+v.toFixed(0);
+}
+const ff=v=>v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const fm=ym=>{if(!ym)return'';const p=ym.split('-');return['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'][+p[1]-1]+'/'+p[0].slice(2)};
+// Label em duas linhas: mês em cima, ano embaixo sempre
+const MN3=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+function fmLabel(ym){
+  const [y,m]=ym.split('-');
+  return `${MN3[+m-1]}<br><span class="yr">${y.slice(2)}</span>`;
+}
+const sn=n=>({
+  'Cronograma de Estudos (3 sessões de Coaching) - Boleto ou PIX à vista':'Coaching — PIX/Boleto',
+  'Cronograma de Estudos (3 sessões de Coaching) - Cartão 12x - de R$ 597 por R$ 350 [ OFERTA ÚNICA EXCLUSIVA ]':'Coaching — Cartão 12x',
+  'Curso Regular Adriana Figueiredo':'Regular — Adriana F.',
+  'Curso Regular Nelma Fontana':'Regular — Nelma F.',
+  'Curso Regular Silvio Sande':'Regular — Silvio S.',
+  'RESUMOS ESTRATÉGICOS':'Resumos Estratégicos',
+  'Discursivas para Concursos Públicos - 3 correções - Boleto ou PIX':'Discursivas — PIX/Boleto',
+  'Discursivas para Concursos Públicos - 3 correções - Cartão 12x':'Discursivas — Cartão 12x',
+  'LEGISLAÇÃO ESTRATÉGICA - SEFAZ/SP':'Leg. Estratégica — SEFAZ/SP',
+  'LEGISLAÇÃO ESTRATÉGICA - ÁREA FISCAL':'Leg. Estratégica — Fiscal',
+})[n]||(n&&n.length>30?n.slice(0,27)+'…':n);
+
+function render(){
+  const catData=getFiltered();
+  const detailData=getDetail(catData);
+  const chart=calcChart(catData);
+  const d=calcDetail(detailData);
+  const allCats=[...new Set(rawData.map(r=>r.concurso))].sort();
+  const app=document.getElementById('app');
+  const hasMonthFilter=activeMonths.size>0;
+  const hasCatFilter=activeFilters.size>0;
+
+  // Active badges
+  const monthLabels=[...activeMonths].sort().map(fm).join(', ');
+  const catLabels=[...activeFilters].map(c=>c.replace('⭐ ','')).join(', ');
+  let badges='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:16px">';
+  if(hasCatFilter) badges+=`<div class="active-filter">Categoria: <strong>${catLabels}</strong> <span class="clear-month" onclick="activeFilters.clear();render()">✕</span></div>`;
+  if(hasMonthFilter) badges+=`<div class="active-filter">Mês: <strong>${monthLabels}</strong> <span class="clear-month" onclick="activeMonths.clear();render()">✕</span></div>`;
+  badges+='</div>';
+
+  const tH=d.trend!==null?`<span class="trend ${d.trend>=0?'up':'dn'}">${d.trend>=0?'↑':'↓'} ${Math.abs(d.trend).toFixed(1)}%</span>`:'';
+
+  // Period label for KPI
+  let periodLabel='Acumulado';
+  if(hasMonthFilter) periodLabel=monthLabels;
+  else{
+    const lm=chart.months[chart.months.length-1];
+    periodLabel=fm(lm);
+  }
+
+  // Monthly bars
+  const maxM=Math.max(...chart.months.map(m=>chart.byMonth[m]?.valor||0));
+  const monthBars=chart.months.map((m,i)=>{
+    const v=chart.byMonth[m]?.valor||0;
+    const q=chart.byMonth[m]?.vendas||0;
+    const pct=maxM>0?(v/maxM*92):0;
+    const isActive=activeMonths.has(m);
+    const isLast=!hasMonthFilter&&i===chart.months.length-1;
+    let color='rgba(96,165,250,.35)';
+    if(isActive) color='rgba(52,211,153,.9)';
+    else if(hasMonthFilter) color='rgba(96,165,250,.18)';
+    else if(isLast) color='rgba(96,165,250,.9)';
+    return `<div class="vbar-col ${isActive?'selected':''}" data-month="${m}">
+      <div class="vbar-tip"><div class="tv">${ff(v)}</div><div class="ts">${q} vendas</div></div>
+      <div class="vbar-bar" style="height:${Math.max(pct,2)}%;background:${color}"></div>
+      <div class="vbar-lbl">${fmLabel(m)}</div>
+    </div>`;
+  }).join('');
+
+  // Cursos
+  const top=d.ranking.slice(0,8);
+  const maxC=top[0]?.valor||1;
+  const cursoBars=top.map((c,i)=>{
+    const pct=c.valor/maxC*100;
+    return `<div class="hbar-row"><div class="hbar-pos">${i+1}.</div><div class="hbar-name" title="${c.nome}">${sn(c.nome)}</div><div class="hbar-track"><div class="hbar-fill" style="width:${pct}%;background:${COLORS[i%COLORS.length]}"><span class="hbar-val">${fmil(c.valor)}</span></div></div></div>`;
+  }).join('');
+
+  // Ranking
+  const maxR=d.ranking[0]?.valor||1;
+  const rankHTML=d.ranking.length>0?d.ranking.map((c,i)=>{
+    const pct=(c.valor/maxR*100).toFixed(0);
+    const rc=i===0?'r1':i===1?'r2':i===2?'r3':'rx';
+    return `<div class="rank-item fade" style="animation-delay:${i*.04}s"><div class="rank-badge ${rc}">${i+1}</div><div class="rank-info"><div class="rank-name">${sn(c.nome)}</div><div class="rank-meta">${c.vendas} vendas · ${c.concurso.replace('⭐ ','')}</div><div class="pbar-bg"><div class="pbar-fill" style="width:${pct}%"></div></div></div><div class="rank-val">${fmil(c.valor)}</div></div>`;
+  }).join(''):'<div style="text-align:center;padding:20px;color:var(--t3);font-size:12px">Nenhum dado para o período selecionado</div>';
+
+  // Hint text
+  const hint=hasMonthFilter?'Ctrl+clique para multi-seleção · Clique novamente para remover':'Clique em uma barra para filtrar · Ctrl para multi-seleção';
+
+  app.innerHTML=`
+    ${(hasCatFilter||hasMonthFilter)?badges:''}
+    <div class="kpi-grid">
+      <div class="kpi e fade"><div class="kpi-top"><div class="ico" style="background:var(--emerald-bg)">💰</div><div class="lbl">${hasMonthFilter?'Vendido':'Total Vendido'}</div></div><div class="val" style="color:var(--emerald)">${fmil(d.tv)}</div><div class="sub">${ff(d.tv)}</div></div>
+      <div class="kpi b fade"><div class="kpi-top"><div class="ico" style="background:var(--blue-bg)">📦</div><div class="lbl">${hasMonthFilter?'Vendas':'Total Vendas'}</div></div><div class="val" style="color:var(--blue)">${d.tq.toLocaleString('pt-BR')}</div><div class="sub">${hasMonthFilter?periodLabel:'unidades vendidas'}</div></div>
+      <div class="kpi a fade"><div class="kpi-top"><div class="ico" style="background:var(--amber-bg)">📅</div><div class="lbl">${hasMonthFilter?'Período':'Último Mês'}</div></div><div class="val" style="color:var(--amber)">${fmil(hasMonthFilter?d.tv:catData.filter(r=>r.anomes===chart.months[chart.months.length-1]).reduce((s,r)=>s+r.valor_total,0))}</div><div class="sub">${periodLabel}</div>${tH}</div>
+      <div class="kpi v fade"><div class="kpi-top"><div class="ico" style="background:var(--violet-bg)">🎯</div><div class="lbl">Ticket Médio</div></div><div class="val" style="color:var(--violet)">${fmil(d.tk)}</div><div class="sub">${ff(d.tk)}</div></div>
+    </div>
+
+    <div class="filter-wrap"><div class="filter-label">Filtrar por Categoria <span style="font-weight:400;letter-spacing:0;text-transform:none;font-size:9px">(Ctrl = multi)</span></div>
+    <div class="chips-outer"><div class="chips">${[{id:'all',label:'Todos'},...allCats.map(c=>({id:c,label:c.replace('⭐ ','')}))]
+      .map(c=>`<span class="chip ${c.id==='all'?(activeFilters.size===0?'on':''):(activeFilters.has(c.id)?'on':'')}" data-f="${c.id}">${c.label}</span>`).join('')}</div></div></div>
+
+    <div class="section"><div class="section-header"><div class="section-title"><span class="dot" style="background:var(--blue)"></span>Vendas por Mês</div><div style="font-size:9px;color:var(--t3)">${hint}</div></div>
+    <div class="chart-card"><div class="vbar-chart" style="position:relative"><div class="vbar-grid"><div class="vbar-grid-line"></div><div class="vbar-grid-line"></div><div class="vbar-grid-line"></div><div class="vbar-grid-line"></div></div>${monthBars}</div></div></div>
+
+    <div class="section"><div class="section-header"><div class="section-title"><span class="dot" style="background:var(--emerald)"></span>Cursos Mais Vendidos</div></div>
+    <div class="chart-card"><div class="hbar-chart">${cursoBars}</div></div></div>
+
+    <div class="section"><div class="section-header"><div class="section-title"><span class="dot" style="background:var(--amber)"></span>Ranking Detalhado</div></div>
+    <div class="ranking">${rankHTML}</div></div>`;
+
+  // Event: category chips
+  document.querySelectorAll('.chip').forEach(c=>c.addEventListener('click',(e)=>{
+    const f=c.dataset.f;
+    if(f==='all'){
+      activeFilters.clear();
+    } else if(e.ctrlKey||e.metaKey){
+      if(activeFilters.has(f)) activeFilters.delete(f); else activeFilters.add(f);
+    } else {
+      if(activeFilters.size===1&&activeFilters.has(f)) activeFilters.clear();
+      else { activeFilters.clear(); activeFilters.add(f); }
+    }
+    render();
+  }));
+
+  // Event: month bar click
+  document.querySelectorAll('.vbar-col').forEach(col=>col.addEventListener('click',(e)=>{
+    const m=col.dataset.month;
+    if(e.ctrlKey||e.metaKey){
+      if(activeMonths.has(m)) activeMonths.delete(m); else activeMonths.add(m);
+    } else {
+      if(activeMonths.size===1&&activeMonths.has(m)) activeMonths.clear();
+      else { activeMonths.clear(); activeMonths.add(m); }
+    }
+    render();
+  }));
+
+  // Animate bars
+  requestAnimationFrame(()=>{
+    document.querySelectorAll('.vbar-bar').forEach(b=>{const h=b.style.height;b.style.height='0%';requestAnimationFrame(()=>b.style.height=h)});
+    document.querySelectorAll('.hbar-fill').forEach(b=>{const w=b.style.width;b.style.width='0%';requestAnimationFrame(()=>b.style.width=w)});
+  });
+}
+
+async function init(){
+  let source='embutido';
+  try{rawData=await loadSheets();source='Google Sheets'}catch(e){rawData=EMBEDDED}
+  const now=new Date();
+  document.getElementById('upd').textContent=`Fonte: ${source} · ${now.toLocaleDateString('pt-BR')} · ${now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`;
+  render();
+}
+init();
+</script>
+</body>
+</html>
